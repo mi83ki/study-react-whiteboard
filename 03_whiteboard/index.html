@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>StayHomeBoard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+  <script type="text/babel">
+    const Board = () => {
+      const [cards, setCards] = React.useState({
+        id1: { t: "Wash", x: 100, y: 100 },
+        id2: { t: "your hands", x: 200, y: 300 },
+      });
+      const update = (key, card) => setCards({ ...cards, [key]: card });
+
+      const [dragging, setDragging] = React.useState({ key: "", x: 0, y: 0 });
+      const [editMode, setEditMode] = React.useState({ key: "" });
+      return (
+        <div
+          style={{ width: "1000px", height: "1000px", position: "relative" }}
+          onDrop={(e) => {
+            if (!dragging || !cards) return;
+            update(dragging.key, { ...cards[dragging.key], x: e.clientX - dragging.x, y: e.clientY - dragging.y });
+          }}
+          onDragOver={(e) => e.preventDefault()} // enable onDrop event
+        >
+          {Object.keys(cards).map((key) => (
+            <div
+              key={key}
+              style={{ position: "absolute", top: cards[key].y + "px", left: cards[key].x + "px" }}
+              draggable={true}
+              onDragStart={(e) => setDragging({ key, x: e.clientX - cards[key].x, y: e.clientY - cards[key].y })}
+            >
+              {editMode.key === key ? (
+                <textarea
+                  onBlur={(e) => setEditMode({ key: "" })}
+                  onChange={(e) => update(key, { ...cards[key], t: e.target.value })}
+                  defaultValue={cards[key].t}
+                />
+              ) : (
+                <div onClick={(e) => setEditMode({ key })}>{cards[key].t}</div>
+              )}
+            </div>
+          ))}
+        </div>
+      );
+    };
+    ReactDOM.render(<Board />, document.getElementById("root"));
+    </script>
+</head>
+
+<body>
+  <div id="root" />
+</body>
+
+</html>
