@@ -76,7 +76,9 @@ Reactでホワイトボードアプリを作成する勉強
 </html>
 ~~~
 
-## Next.jsプロジェクトの作成
+## Next.jsで動かす
+
+### Next.jsプロジェクトの作成
 
 以下のコマンドでプロジェクトを作成する
 
@@ -100,10 +102,48 @@ Ok to proceed? (y) y
 Creating a new Next.js app in C:\Users\Mr_te\Documents\01_git\study-react-whiteboard\01_todo\next-todo-app.
 ~~~
 
-## Next.jsアプリの起動
+### Next.jsアプリの起動
 
 以下のコマンドでNext.jsアプリを起動し、<http://localhost:3000/>にアクセスする
 
 ~~~bash
 npm run dev
+~~~
+
+### useStateでエラーが発生する
+
+以下のエラーが発生した。
+
+~~~text
+You're importing a component that needs useState. It only works in a Client Component but none of its parents are marked with "use client", so they're Server Components by default.
+
+   ,-[C:\Users\Mr_te\Documents\01_git\study-react-whiteboard\04_whiteboard2\next-whiteboard\src\app\page.tsx:1:1]
+ 1 | //"use client"; // This is a client component
+ 2 | 
+ 3 | import { useState } from 'react';
+   :          ^^^^^^^^
+ 4 | import styles from './page.module.css';
+ 5 | 
+ 6 | export default function Home() {
+   `----
+
+Maybe one of these should be marked as a client entry with "use client":
+./src\app\page.tsx
+~~~
+
+Next.jsではパフォーマンスの向上のため、サーバーコンポーネントには、クライアント固有のコード (たとえば、useStateなどのフック) を含めるべきではないらしい。したがってuseStateを使う場合は、明示的にクライアントコンポーネントであることを宣言する必要がある。\
+ファイルの先頭に`"use client";`を追加すると解決する。
+
+~~~diff
++ "use client"; // This is a client component
+
+import { useState } from 'react';
+import styles from './page.module.css';
+
+export default function Home() {
+  const [cards, setCards] = useState({
+    id1: { t: "Wash", x: 100, y: 100 },
+    id2: { t: "your hands", x: 200, y: 300 },
+  });
+  const update = (key, card) => setCards({ ...cards, [key]: card });
 ~~~
