@@ -166,7 +166,6 @@ npm install canvas
 √ Use App Router (recommended)? ... No
 ~~~
 
-
 pages/index.tsxファイルを作成し、以下を入力して終了。
 
 ~~~tsx
@@ -288,3 +287,8 @@ styles/Home.module.cssを以下に変更する。
   border: 1px solid #ccc;
 }
 ~~~
+
+## Next.jsのチュートリアル
+
+以下のチュートリアルが勉強になる。
+<https://nextjs.org/learn/foundations/about-nextjs>
