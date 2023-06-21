@@ -292,3 +292,23 @@ styles/Home.module.cssを以下に変更する。
 
 以下のチュートリアルが勉強になる。
 <https://nextjs.org/learn/foundations/about-nextjs>
+
+## エラーが出る
+
+nextjsのプロジェクトを作成してサンプルコードをnpm run devすると、エラーになる。
+
+~~~bash
+SyntaxError: Unexpected token '??='
+    at wrapSafe (internal/modules/cjs/loader.js:1001:16)
+    at Module._compile (internal/modules/cjs/loader.js:1049:27)
+    at Object.Module._extensions..js (internal/modules/cjs/loader.js:1114:10)
+    at Module.load (internal/modules/cjs/loader.js:950:32)
+    at Function.Module._load (internal/modules/cjs/loader.js:790:14)
+    at Module.require (internal/modules/cjs/loader.js:974:19)
+    at require (internal/modules/cjs/helpers.js:92:18)
+    at Object.<anonymous> (C:\Users\miya\Documents\03_git\study-react-whiteboard\06_nextjs_tutorial\04_nextjs_blog\nextjs-blog\node_modules\next\dist\telemetry\post-payload.js:17:20)
+    at Module._compile (internal/modules/cjs/loader.js:1085:14)
+    at Object.Module._extensions..js (internal/modules/cjs/loader.js:1114:10)
+~~~
+
+node.jsをアップデートすると解決（v14.17.3→v18.16.1）
