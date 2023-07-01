@@ -21,7 +21,7 @@ export default function Header() {
           mx="auto"
         >
           <Heading as="h1" size="lg">
-            <NextLink href="/">Blog App</NextLink>
+            <NextLink href="/">MapApp</NextLink>
           </Heading>
         </Flex>
       </Flex>
