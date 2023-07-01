@@ -312,3 +312,182 @@ SyntaxError: Unexpected token '??='
 ~~~
 
 node.jsをアップデートすると解決（v14.17.3→v18.16.1）
+
+## App Routerについて
+
+App RouterはNext.js 13.4 で Stable となり本番環境でも利用することができるようになった機能。
+ファイル名でルーティングを設定していた既存の Page Router とは全く異なる機能で設定方法も一から学び直す必要がある。
+App Routerは積極的にprefetchを行うことで、従来のpagesとは違い直前の画面が表示されて待たされると言うことがほぼなく、即座に遷移が発生するような体験がデフォルトになる。
+新たにプロジェクトを作成するのであれば App Router を利用することが推奨されている。
+
+<https://reffect.co.jp/react/next-js-13-app/>
+<https://zenn.dev/akfm/articles/next-app-router-navigation>
+
+## Chakra UI
+
+誰でもデザインを簡単に作ることができるデザインコンポーネントライブラリである Chakra UI を勉強する。
+参考にさせていただいたURL：<https://zenn.dev/dala/books/nextjs-chatgpt/viewer/chakra>
+
+### インストール
+
+まずNext.jsのプロジェクトを作成する。
+
+~~~bash
+npx create-next-app@latest
+~~~
+
+プロジェクト名、各種選択は以下で設定
+
+~~~bash
+Need to install the following packages:
+create-next-app@13.4.4
+Ok to proceed? (y) y
+√ What is your project named? ... nextjs-chakraui
+√ Would you like to use TypeScript with this project? ... Yes
+√ Would you like to use ESLint with this project? ... Yes
+√ Would you like to use Tailwind CSS with this project? ... No
+√ Would you like to use `src/` directory with this project? ... Yes
+√ Use App Router (recommended)? ... Yes
+√ Would you like to customize the default import alias? ... Yes
+√ What import alias would you like configured? ... @/*
+Creating a new Next.js app in C:\Users\Mr_te\Documents\01_git\study-react-whiteboard\01_todo\next-todo-app.
+~~~
+
+続いてChakra UIをインストールする
+
+~~~bash
+cd nextjs-chakraui/
+npm install @chakra-ui/react @emotion/react @emotion/styled framer-motion
+~~~
+
+### 初期設定
+
+Chakra UI を使うためには ChakraProvider をアプリケーションのルートに設定する必要がある。
+App Router においては app/layout.tsx がルート要素になる。
+ここに ChakraProvider を設定する。
+<https://zenn.dev/azukiazusa/articles/next-js-app-dir-tutorial>
+
+appディレクトリにProvider.tsxを作成し、以下を記述する。
+
+~~~tsx
+// app/Provider.tsx
+"use client";
+
+import { ChakraProvider } from "@chakra-ui/react";
+
+export default function Provider({ children }: { children: React.ReactNode }) {
+  return <ChakraProvider>{children}</ChakraProvider>;
+}
+~~~
+
+layout.tsxに以下の行を追加する
+
+~~~diff
+    // app/layout.tsx
+    import Link from "next/link";
++   import Provider from "./Provider";
+
+    export default function RootLayout({
+    children,
+    }: {
+    children: React.ReactNode;
+    }) {
+    return (
+        <html lang="ja">
+        <head />
+        <body>
++           <Provider>
+                <header>
+                    {/* ... */}
++           </Provider>
+        </body>
+        </html>
+    );
+    }
+~~~
+
+Chakra UI のコンポーネントを使うたびに "use client" を宣言するのは手間がかかる。
+app/common/components/index.tsx でまとめて Chatra UI のコンポーネントを export して Client Component として使えるようにする。
+
+~~~tsx
+// app/common/components/index.tsx
+"use client";
+export * from "@chakra-ui/react";
+~~~
+
+Chakra UIのコンポーネントを使う場合は以下のように書けば、use clientが不要になる。
+
+~~~tsx
+import { Button } from "./common/components";
+~~~
+
+## React Icon
+
+React Icons は、Font Awesome や Material、Codicons（VSCode のアイコン）などのアイコンを簡単に利用することができる React 用のライブラリ。
+<https://zenn.dev/taichifukumoto/articles/how-to-use-react-icons>
+
+~~~bash
+npm install react-icons
+~~~
+
+## React Konva
+
+react-konvaは2Dグラフィックスを描くためのJavaScriptライブラリで、canvasをReact風に宣言的に使えるようにしたライブラリ
+
+~~~bash
+npm install react-konva konva
+~~~
+
+### React KonvaをNextjsで使用すると以下のエラーが発生する
+
+~~~error
+./node_modules/konva/lib/index-node.js:4:0
+Module not found: Can't resolve 'canvas'
+Did you mean './canvas'?
+Requests that should resolve in the current directory need to start with './'.
+Requests that start with a name are treated as module requests and resolve within module directories (node_modules, C:\Users\miya\Documents\03_git\study-react-whiteboard\07_nextjs_chakraui\nextjs-chakraui).
+If changing the source code is not an option there is also a resolve options called 'preferRelative' which tries to resolve these kind of requests in the current directory too.
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./node_modules/react-konva/lib/ReactKonva.js
+./src/components/MapCanvas.tsx
+./src/app/page.tsx
+~~~
+
+React Konvaはcanvasモジュールを使用するが、その依存関係が明示的でないためにこのエラーが発生するらしい。
+これを回避するには、例えば以下のように動的読み込みを使用する必要がある。
+<https://github.com/konvajs/react-konva#usage-with-nextjs>
+
+~~~tsx
+// components/canvas.tsx
+'use client';
+import { Stage, Layer, Circle } from 'react-konva';
+
+function Canvas(props) {
+  return (
+    <Stage width={window.innerWidth} height={window.innerHeight}>
+      <Layer>
+        <Circle x={200} y={100} radius={50} fill="green" />
+      </Layer>
+    </Stage>
+  );
+}
+
+export default Canvas;
+~~~
+
+~~~tsx
+// page.tsx
+'use client';
+import dynamic from 'next/dynamic';
+
+const Canvas = dynamic(() => import('../components/canvas'), {
+  ssr: false,
+});
+
+export default function Page(props) {
+  return <Canvas />;
+}
+~~~
