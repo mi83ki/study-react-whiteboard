@@ -2,10 +2,12 @@
 
 import MapData from "@/hooks/MapData";
 import MapNode from "@/hooks/MapNode";
+import MapPath from "@/hooks/MapPath";
 import { useEffect, useRef, useState } from "react";
-import { Layer, Stage, Text } from "react-konva";
+import { Stage } from "react-konva";
 import ItemLines from "./ItemLines";
 import ItemNodes from "./ItemNodes";
+import ItemPaths from "./ItemPaths";
 import Sidebar, { LinkItemProps } from "./Sidebar";
 import {
   FiCircle,
@@ -41,10 +43,12 @@ export default function MapCanvas() {
   const widthRef: any = useRef(null);
   const [selectedTool, setSelectedTool] = useState<string>("selection");
   const [nodes, setNodes] = useState<MapNode[]>(mapData.nodes);
+  const [paths, setPaths] = useState<MapPath[]>(mapData.paths);
   const [canvasWidth, setCanvasWidth] = useState<number>(0);
   const [canvasHeight, setCanvasHeight] = useState<number>(0);
   const [lines, setLines] = useState<any[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
+  let tempPath: MapPath | null = null;
 
   /** 読み込み完了コールバックでキャンバスの幅を設定する */
   useEffect(() => {
@@ -79,19 +83,21 @@ export default function MapCanvas() {
       case "NAVI_NODE_CHARGE":
         mapData.addNode(offsetX, offsetY, "CHARGE");
         setNodes(() => [...mapData.nodes]);
+        console.log({ action: "handleStageClick", nodes: nodes.length });
         break;
       case "NAVI_NODE_MISSION_PAD":
         mapData.addNode(offsetX, offsetY, "MISSION_PAD");
         setNodes(() => [...mapData.nodes]);
+        console.log({ action: "handleStageClick", nodes: nodes.length });
         break;
       case "NAVI_NODE_DEFAULT":
         mapData.addNode(offsetX, offsetY, "DEFAULT");
         setNodes(() => [...mapData.nodes]);
+        console.log({ action: "handleStageClick", nodes: nodes.length });
         break;
       default:
         break;
     }
-    console.log({ action: "handleStageClick", nodes: nodes.length });
   };
 
   /**
@@ -99,7 +105,6 @@ export default function MapCanvas() {
    * @param e
    */
   const handleMouseDown = (e: any) => {
-    console.log({ action: "handleMouseDown", msg: "called" });
     const { offsetX, offsetY } = e.evt;
 
     switch (selectedTool) {
@@ -107,6 +112,7 @@ export default function MapCanvas() {
         // 新しい直線の始点を設定
         setLines([...lines, { points: [offsetX, offsetY] }]);
         setIsDrawing(true);
+        console.log({ action: "handleMouseDown", isDrawing: isDrawing });
         break;
       default:
         break;
@@ -141,10 +147,10 @@ export default function MapCanvas() {
    * マウスアップイベント
    */
   const handleMouseUp = () => {
-    console.log({ action: "handleMouseUp", msg: "called" });
     switch (selectedTool) {
       case "NAVI_PEN":
         setIsDrawing(false);
+        console.log({ action: "handleMouseUp", isDrawing: isDrawing });
         break;
       default:
         break;
@@ -156,10 +162,34 @@ export default function MapCanvas() {
    * @param nodeId ノードID
    */
   const handleNodeClick = (nodeId: string) => {
-    console.log({ action: "handleNodeClick", nodeId: nodeId });
     switch (selectedTool) {
       case "NAVI_PATH":
-        setIsDrawing(false);
+        const node = mapData.getNode(nodeId);
+        if (node === undefined) {
+          console.log({
+            action: "handleNodeClick",
+            error: "node not found.",
+          });
+          return;
+        }
+        if (!isDrawing) {
+          tempPath = new MapPath(node);
+          setIsDrawing(true);
+        } else {
+          if (tempPath !== null) {
+            tempPath.end = node;
+            mapData.addPath(tempPath.start, tempPath.end);
+            tempPath = null;
+            setPaths(() => [...mapData.paths]);
+          }
+          setIsDrawing(false);
+        }
+        console.log({
+          action: "handleNodeClick",
+          nodeId: nodeId,
+          tempPath: tempPath,
+          isDrawing: isDrawing,
+        });
         break;
       default:
         break;
@@ -178,10 +208,8 @@ export default function MapCanvas() {
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
           >
-            <Layer>
-              <Text text="Hello, Draw.io!" x={20} y={20} />
-            </Layer>
             <ItemNodes onClickNode={handleNodeClick} nodes={nodes} />
+            <ItemPaths paths={paths} />
             <ItemLines lines={lines} />
           </Stage>
         </div>

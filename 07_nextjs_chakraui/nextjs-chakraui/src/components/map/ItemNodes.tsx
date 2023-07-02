@@ -1,7 +1,7 @@
 "use client";
 
 import MapNode from "@/hooks/MapNode";
-import { Image, Layer, Text } from "react-konva";
+import { Image, Layer } from "react-konva";
 
 import { useIconImage } from "./useIconImage";
 
@@ -33,7 +33,6 @@ export default function ItemNodes(props: ItemNodesProps) {
   return (
     <Layer>
       {nodes.map((node: MapNode, index: number) => {
-        console.log(node.category);
         return (
           <Image
             onClick={handleClick}
@@ -49,8 +48,6 @@ export default function ItemNodes(props: ItemNodesProps) {
           />
         );
       })}
-
-      <Text text="Hello, Draw.io!" x={20} y={20} />
     </Layer>
   );
 }
