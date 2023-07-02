@@ -491,3 +491,20 @@ export default function Page(props) {
   return <Canvas />;
 }
 ~~~
+
+## UUIDを使う
+
+参考にさせていただいたURL：<https://qiita.com/kagami_t/items/f99f3499aa586ddcd02b>
+
+~~~bash
+npm install uuid
+npm i --save-dev @types/uuid
+~~~
+
+~~~tsx
+import { v4 as uuidv4 } from 'uuid';
+
+// Generate a unique ID
+const uniqueId = uuidv4();
+console.log('A unique ID:', uniqueId);
+~~~
