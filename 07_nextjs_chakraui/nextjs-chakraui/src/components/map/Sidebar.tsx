@@ -16,24 +16,31 @@ import {
 import { ReactNode } from "react";
 import { IconType } from "react-icons";
 import {
-  FiCompass,
-  FiHome,
+  FiCircle,
   FiMenu,
-  FiSettings,
-  FiStar,
-  FiTrendingUp,
-} from "react-icons/fi";
+  FiMinus,
+  FiStopCircle,
+  FiTarget,
+  LiaRouteSolid,
+} from "./icons";
 
+/**
+ * リンクアイテムの定義
+ */
 interface LinkItemProps {
   name: string;
   icon: IconType;
 }
+
+/**
+ * サイドバーのリンクアイテム
+ */
 const LinkItems: Array<LinkItemProps> = [
-  { name: "Home", icon: FiHome },
-  { name: "Trending", icon: FiTrendingUp },
-  { name: "Explore", icon: FiCompass },
-  { name: "Favourites", icon: FiStar },
-  { name: "Settings", icon: FiSettings },
+  { name: "充電ステーション", icon: FiTarget },
+  { name: "ミッションパッド", icon: FiStopCircle },
+  { name: "ノード", icon: FiCircle },
+  { name: "パス", icon: FiMinus },
+  { name: "タスク", icon: LiaRouteSolid },
 ];
 
 /**
@@ -71,12 +78,15 @@ export default function Sidebar({ children }: { children: ReactNode }) {
   );
 }
 
+/**
+ * サイドバーコンポーネントの引数
+ */
 interface SidebarProps extends BoxProps {
   onClose: () => void;
 }
 
 /**
- * サイドバーのコンテンツ
+ * サイドバーコンテンツのコンポーネント
  * @param param0
  * @returns
  */
@@ -93,7 +103,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
     >
       <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
         <Text fontSize="2xl" fontFamily="monospace" fontWeight="bold">
-          Logo
+          MapItem
         </Text>
         <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
       </Flex>
@@ -106,13 +116,16 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
   );
 };
 
+/**
+ * ナビゲーションコンポーネントの引数
+ */
 interface NavItemProps extends FlexProps {
   icon: IconType;
   children: string;
 }
 
 /**
- * ナビゲーション用のアイテム
+ * ナビゲーションコンポーネント
  * @param param0
  * @returns
  */
@@ -131,7 +144,7 @@ const NavItem = ({ icon, children, ...rest }: NavItemProps) => {
         role="group"
         cursor="pointer"
         _hover={{
-          bg: "cyan.400",
+          bg: "rgb(255, 101, 117)",
           color: "white",
         }}
         {...rest}
@@ -152,9 +165,18 @@ const NavItem = ({ icon, children, ...rest }: NavItemProps) => {
   );
 };
 
+/**
+ * モバイル画面コンポーネントの引数
+ */
 interface MobileProps extends FlexProps {
   onOpen: () => void;
 }
+
+/**
+ * モバイル画面用のコンポーネント
+ * @param param0
+ * @returns
+ */
 const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
   return (
     <Flex

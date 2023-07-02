@@ -1,16 +1,20 @@
 "use client";
 
-import Sidebar from "@/components/Sidebar";
+import MapData from "@/hooks/MapData";
+import MapNode from "@/hooks/MapNode";
 import { useEffect, useRef, useState } from "react";
 import { Layer, Stage, Text } from "react-konva";
 import ItemLines from "./ItemLines";
-import ItemRects from "./ItemNodes";
+import ItemNodes from "./ItemNodes";
+import Sidebar from "./Sidebar";
+
+const mapData: MapData = new MapData();
 
 export default function MapCanvas() {
   const heightRef: any = useRef(null);
   const widthRef: any = useRef(null);
   const [selectedTool, setSelectedTool] = useState<string>("selection");
-  const [shapes, setShapes] = useState<any[]>([]);
+  const [nodes, setNodes] = useState<MapNode[]>(mapData.nodes);
   const [canvasWidth, setCanvasWidth] = useState<number>(0);
   const [canvasHeight, setCanvasHeight] = useState<number>(0);
   const [lines, setLines] = useState<any[]>([]);
@@ -40,16 +44,9 @@ export default function MapCanvas() {
    */
   const handleStageClick = (event: any) => {
     const { offsetX, offsetY } = event.evt;
-    const newShape = {
-      type: "rect",
-      x: offsetX,
-      y: offsetY,
-      width: 50,
-      height: 50,
-      fill: "white",
-    };
+    mapData.addNode(offsetX, offsetY, "DEFAULT");
 
-    setShapes((prevShapes) => [...prevShapes, newShape]);
+    setNodes(mapData.nodes);
   };
 
   /**
@@ -106,7 +103,7 @@ export default function MapCanvas() {
             <Layer>
               <Text text="Hello, Draw.io!" x={20} y={20} />
             </Layer>
-            <ItemRects shapes={shapes} />
+            <ItemNodes nodes={nodes} />
             <ItemLines lines={lines} />
           </Stage>
         </div>
