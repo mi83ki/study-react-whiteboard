@@ -1,8 +1,9 @@
 "use client";
 
 import MapNode from "@/hooks/MapNode";
-import { Image, Layer } from "react-konva";
+import { Layer } from "react-konva";
 
+import ItemNode from "./ItemNode";
 import { useIconImage } from "./useIconImage";
 
 /**
@@ -26,25 +27,15 @@ export default function ItemNodes(props: ItemNodesProps) {
     MISSION_PAD: useIconImage("FiStopCircle", 50),
   };
 
-  const handleClick = (event: any) => {
-    onClickNode(event.target.attrs.id);
-  };
-
   return (
     <Layer>
       {nodes.map((node: MapNode, index: number) => {
         return (
-          <Image
-            onClick={handleClick}
-            image={nodeImages[node.category]}
+          <ItemNode
+            node={node}
             key={index}
-            id={node.id}
-            x={node.x - node.width / 2}
-            y={node.y - node.height / 2}
-            width={node.width}
-            height={node.height}
-            draggable
-            alt=""
+            image={nodeImages[node.category]}
+            onClickNode={onClickNode}
           />
         );
       })}

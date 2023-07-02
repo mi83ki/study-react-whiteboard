@@ -12,7 +12,7 @@ export default class MapPath {
   /** 終点 */
   end: MapNode | null = null;
   /** 線幅 */
-  strokeWidth: number = 10;
+  strokeWidth: number = 50;
 
   /**
    * コンストラクタ

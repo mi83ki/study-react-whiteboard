@@ -24,7 +24,8 @@ export default function ItemPaths(props: ItemPathsProps) {
           <Line
             key={index}
             points={[path.start.x, path.start.y, path.end.x, path.end.y]}
-            stroke="black"
+            stroke="rgb(255, 101, 117)"
+            opacity={0.3}
             strokeWidth={path.strokeWidth}
           />
         );

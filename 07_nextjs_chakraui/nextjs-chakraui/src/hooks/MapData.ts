@@ -44,6 +44,31 @@ export default class MapData {
   }
 
   /**
+   * 指定した距離の範囲内で最も近いノードを取得する
+   * @param x
+   * @param y
+   * @param distance
+   * @returns
+   */
+  searchNode(x: number, y: number, distance: number = 50 / 2): MapNode | null {
+    let minDistance = distance;
+    let retNode: MapNode | null = null;
+    this._nodes.forEach((node: MapNode) => {
+      const d = node.calcDistance(x, y);
+      if (d <= minDistance) {
+        minDistance = d;
+        retNode = node;
+        console.log({
+          action: "searchNode",
+          minDistance: minDistance,
+          retNode: retNode,
+        });
+      }
+    });
+    return retNode;
+  }
+
+  /**
    * パスリストを取得する
    */
   get paths(): MapPath[] {
@@ -75,5 +100,28 @@ export default class MapData {
     if (path === undefined) return false;
     path.end = end;
     return true;
+  }
+
+  /**
+   * パスを削除する
+   * @param id パスID
+   */
+  deletePath(id: string): boolean {
+    let deleteIndex = null;
+    this._paths.forEach((path: MapPath, index: number) => {
+      if (path.id === id) {
+        deleteIndex = index;
+      }
+    });
+    if (deleteIndex !== null) {
+      this._paths.splice(deleteIndex, 1);
+      console.log({
+        action: "deletePath",
+        deleteIndex: deleteIndex,
+        paths: this._paths,
+      });
+      return true;
+    }
+    return false;
   }
 }

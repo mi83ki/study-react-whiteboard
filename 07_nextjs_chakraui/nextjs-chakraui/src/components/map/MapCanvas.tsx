@@ -48,7 +48,8 @@ export default function MapCanvas() {
   const [canvasHeight, setCanvasHeight] = useState<number>(0);
   const [lines, setLines] = useState<any[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
-  let tempPath: MapPath | null = null;
+  const [tempPathId, setTempPathId] = useState<string>("");
+  const [selectNode, setSelectNode] = useState<MapNode | null>(null);
 
   /** 読み込み完了コールバックでキャンバスの幅を設定する */
   useEffect(() => {
@@ -108,6 +109,25 @@ export default function MapCanvas() {
     const { offsetX, offsetY } = e.evt;
 
     switch (selectedTool) {
+      case "NAVI_SELECT":
+        const node = mapData.searchNode(offsetX, offsetY);
+        if (node !== null) {
+          node.x = offsetX;
+          node.y = offsetY;
+          setSelectNode(node);
+          setNodes(() => [...mapData.nodes]);
+          setPaths(() => [...mapData.paths]);
+        }
+        break;
+      case "NAVI_PATH":
+        const start = mapData.searchNode(offsetX, offsetY);
+        if (start !== null) {
+          console.log({ action: "handleMouseDown", node: start });
+          //const path = new MapPath(start, start);
+          setTempPathId(mapData.addPath(start, start));
+          setPaths(() => [...mapData.paths]);
+        }
+        break;
       case "NAVI_PEN":
         // 新しい直線の始点を設定
         setLines([...lines, { points: [offsetX, offsetY] }]);
@@ -125,11 +145,24 @@ export default function MapCanvas() {
    * @returns
    */
   const handleMouseMove = (e: any) => {
+    const { offsetX, offsetY } = e.evt;
     //console.log({ action: "handleMouseMove", msg: "called" });
     switch (selectedTool) {
+      case "NAVI_SELECT":
+        if (selectNode !== null) {
+          selectNode.x = offsetX;
+          selectNode.y = offsetY;
+          setNodes(() => [...mapData.nodes]);
+          setPaths(() => [...mapData.paths]);
+        }
+        break;
+      case "NAVI_PATH":
+        const node = new MapNode(offsetX, offsetY);
+        mapData.setPathEnd(tempPathId, node);
+        setPaths(() => [...mapData.paths]);
+        break;
       case "NAVI_PEN":
         if (!isDrawing) return;
-        const { offsetX, offsetY } = e.evt;
         // 直線の終点を追加
         const lastLine = lines[lines.length - 1];
         lastLine.points = lastLine.points.concat([offsetX, offsetY]);
@@ -146,8 +179,28 @@ export default function MapCanvas() {
   /**
    * マウスアップイベント
    */
-  const handleMouseUp = () => {
+  const handleMouseUp = (e: any) => {
+    const { offsetX, offsetY } = e.evt;
     switch (selectedTool) {
+      case "NAVI_SELECT":
+        if (selectNode !== null) {
+          selectNode.x = offsetX;
+          selectNode.y = offsetY;
+          setSelectNode(null);
+          setNodes(() => [...mapData.nodes]);
+          setPaths(() => [...mapData.paths]);
+        }
+        break;
+      case "NAVI_PATH":
+        const end = mapData.searchNode(offsetX, offsetY);
+        if (end !== null) {
+          mapData.setPathEnd(tempPathId, end);
+          setPaths(() => [...mapData.paths]);
+        } else {
+          mapData.deletePath(tempPathId);
+        }
+        setTempPathId("");
+        break;
       case "NAVI_PEN":
         setIsDrawing(false);
         console.log({ action: "handleMouseUp", isDrawing: isDrawing });
@@ -164,32 +217,6 @@ export default function MapCanvas() {
   const handleNodeClick = (nodeId: string) => {
     switch (selectedTool) {
       case "NAVI_PATH":
-        const node = mapData.getNode(nodeId);
-        if (node === undefined) {
-          console.log({
-            action: "handleNodeClick",
-            error: "node not found.",
-          });
-          return;
-        }
-        if (!isDrawing) {
-          tempPath = new MapPath(node);
-          setIsDrawing(true);
-        } else {
-          if (tempPath !== null) {
-            tempPath.end = node;
-            mapData.addPath(tempPath.start, tempPath.end);
-            tempPath = null;
-            setPaths(() => [...mapData.paths]);
-          }
-          setIsDrawing(false);
-        }
-        console.log({
-          action: "handleNodeClick",
-          nodeId: nodeId,
-          tempPath: tempPath,
-          isDrawing: isDrawing,
-        });
         break;
       default:
         break;
