@@ -15,45 +15,43 @@ import {
 } from "@chakra-ui/react";
 import { ReactNode } from "react";
 import { IconType } from "react-icons";
-import {
-  FiCircle,
-  FiMenu,
-  FiMinus,
-  FiStopCircle,
-  FiTarget,
-  LiaRouteSolid,
-} from "./icons";
-
+import { FiMenu } from "./icons";
 /**
  * リンクアイテムの定義
  */
-interface LinkItemProps {
+export interface LinkItemProps {
+  id: string;
   name: string;
   icon: IconType;
 }
 
 /**
- * サイドバーのリンクアイテム
+ * サイドバーコンポーネントの引数
  */
-const LinkItems: Array<LinkItemProps> = [
-  { name: "充電ステーション", icon: FiTarget },
-  { name: "ミッションパッド", icon: FiStopCircle },
-  { name: "ノード", icon: FiCircle },
-  { name: "パス", icon: FiMinus },
-  { name: "タスク", icon: LiaRouteSolid },
-];
+interface SidebarProps extends FlexProps {
+  naviItems: LinkItemProps[];
+  onClickNavi: (name: string) => void;
+  children: ReactNode;
+}
 
 /**
  * サイドバーコンポーネント
  * @param param0
  * @returns
  */
-export default function Sidebar({ children }: { children: ReactNode }) {
+export default function Sidebar({
+  naviItems,
+  onClickNavi,
+  children,
+  ...rest
+}: SidebarProps) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <Box bg={useColorModeValue("gray.100", "gray.900")}>
       <SidebarContent
+        naviItems={naviItems}
         onClose={() => onClose}
+        onClickNavi={onClickNavi}
         display={{ base: "none", md: "block" }}
       />
       <Drawer
@@ -66,7 +64,11 @@ export default function Sidebar({ children }: { children: ReactNode }) {
         size="full"
       >
         <DrawerContent>
-          <SidebarContent onClose={onClose} />
+          <SidebarContent
+            naviItems={naviItems}
+            onClose={onClose}
+            onClickNavi={onClickNavi}
+          />
         </DrawerContent>
       </Drawer>
       {/* mobilenav */}
@@ -81,8 +83,10 @@ export default function Sidebar({ children }: { children: ReactNode }) {
 /**
  * サイドバーコンポーネントの引数
  */
-interface SidebarProps extends BoxProps {
+interface SidebarContentProps extends BoxProps {
+  naviItems: LinkItemProps[];
   onClose: () => void;
+  onClickNavi: (name: string) => void;
 }
 
 /**
@@ -90,7 +94,12 @@ interface SidebarProps extends BoxProps {
  * @param param0
  * @returns
  */
-const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
+const SidebarContent = ({
+  naviItems,
+  onClose,
+  onClickNavi,
+  ...rest
+}: SidebarContentProps) => {
   return (
     <Box
       bg={useColorModeValue("white", "gray.900")}
@@ -107,9 +116,14 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
         </Text>
         <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
       </Flex>
-      {LinkItems.map((link) => (
-        <NavItem key={link.name} icon={link.icon}>
-          {link.name}
+      {naviItems.map((navi) => (
+        <NavItem
+          id={navi.id}
+          key={navi.name}
+          icon={navi.icon}
+          onClickNavi={onClickNavi}
+        >
+          {navi.name}
         </NavItem>
       ))}
     </Box>
@@ -120,7 +134,9 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
  * ナビゲーションコンポーネントの引数
  */
 interface NavItemProps extends FlexProps {
+  id: string;
   icon: IconType;
+  onClickNavi: (name: string) => void;
   children: string;
 }
 
@@ -129,7 +145,16 @@ interface NavItemProps extends FlexProps {
  * @param param0
  * @returns
  */
-const NavItem = ({ icon, children, ...rest }: NavItemProps) => {
+const NavItem = ({
+  id,
+  icon,
+  onClickNavi,
+  children,
+  ...rest
+}: NavItemProps) => {
+  const handleClick = (event: any) => {
+    onClickNavi(id);
+  };
   return (
     <Link
       href="#"
@@ -137,6 +162,7 @@ const NavItem = ({ icon, children, ...rest }: NavItemProps) => {
       _focus={{ boxShadow: "none" }}
     >
       <Flex
+        onClick={handleClick}
         align="center"
         p="4"
         mx="4"

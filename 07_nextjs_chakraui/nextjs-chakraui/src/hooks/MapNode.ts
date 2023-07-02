@@ -1,7 +1,11 @@
+import { v4 as uuidv4 } from "uuid";
+
 /**
  * ノードクラス
  */
 export default class MapNode {
+  /** ノードID */
+  id: string = "";
   /** x座標 */
   x: number = 0;
   /** y座標 */
@@ -19,7 +23,9 @@ export default class MapNode {
    * @param y y座標
    */
   constructor(x: number, y: number, category: string = "DEFAULT") {
+    this.id = uuidv4();
     this.x = x;
     this.y = y;
+    this.category = category;
   }
 }
